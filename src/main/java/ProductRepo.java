@@ -5,7 +5,8 @@ public class ProductRepo
 {
     private List<Product> products;
 
-    public ProductRepo() {
+    public ProductRepo()
+    {
         products = new ArrayList<>();
         products.add(new Product("1", "Apfel"));
     }
