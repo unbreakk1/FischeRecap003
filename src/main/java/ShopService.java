@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 
 public class ShopService
 {
-    private ProductRepo productRepo = new ProductRepo();
-    private OrderRepo orderRepo = new OrderMapRepo();
+    private final ProductRepo productRepo = new ProductRepo();
+    private final OrderRepo orderRepo = new OrderMapRepo();
 
     public Order addOrder(List<String> productIds)
     {
         List<Product> products = new ArrayList<>();
-        for (String productId : productIds) {
-
+        for (String productId : productIds)
+        {
             Optional<Product> productToOrder = productRepo.getProductById(productId);
 
             products.add(productToOrder.orElseThrow(() ->
@@ -24,15 +24,14 @@ public class ShopService
         return orderRepo.addOrder(newOrder);
     }
 
-    public Order updateOrderStatus(String orderId, OrderStatus newStatus)
+    public Order updateOrder(String orderId, OrderStatus newStatus)
     {
         Order existingOrder = orderRepo.getOrderById(orderId);
-        if (existingOrder == null) {
-            System.out.println("Order mit der Id: " + orderId + " wurde nicht gefunden!");
-            return null;
-        }
+        if (existingOrder == null)
+            throw new IllegalArgumentException("Order with ID " + orderId + " not found!");
 
-        Order updatedOrder = new Order(existingOrder.id(), existingOrder.products(), newStatus);
+
+        Order updatedOrder = existingOrder.withStatus(newStatus);
 
         orderRepo.removeOrder(orderId);
         orderRepo.addOrder(updatedOrder);
@@ -46,5 +45,6 @@ public class ShopService
                 .filter(order -> order.status() == status)
                 .collect(Collectors.toList());
     }
+
 }
 
