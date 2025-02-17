@@ -3,7 +3,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OrderMapRepo implements OrderRepo{
+public class OrderMapRepo implements OrderRepo
+{
     private Map<String, Order> orders = new HashMap<>();
 
     @Override
@@ -17,7 +18,8 @@ public class OrderMapRepo implements OrderRepo{
     }
 
     @Override
-    public Order addOrder(Order newOrder) {
+    public Order addOrder(Order newOrder)
+    {
         orders.put(newOrder.id(), newOrder);
         return newOrder;
     }
