@@ -13,7 +13,7 @@ public class Main
 
         ShopService shopService = new ShopService(productRepo, orderRepo);
 
-        List<String> order1Products = List.of("1"); // Product ID "1" -> "Apfel"
+        List<String> order1Products = List.of("1");
         Order order1 = shopService.addOrder(order1Products);
         System.out.println("Added Order 1: " + order1);
 
@@ -25,10 +25,17 @@ public class Main
         Order order3 = shopService.addOrder(order3Products);
         System.out.println("Added Order 3: " + order3);
 
-        List<String> order4Products = List.of("99");
-        Order order4 = shopService.addOrder(order4Products);
+        try
+        {
+            List<String> order4Products = List.of("99");
+            Order order4 = shopService.addOrder(order4Products);
+            System.out.println("Added Order 4: " + order4);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            System.err.println("Failed to add Order 4: " + ex.getMessage());
+        }
 
-        // List all orders in repository
         System.out.println("\nAll orders in repository:");
         orderRepo.getOrders().forEach(System.out::println);
     }
