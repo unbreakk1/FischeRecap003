@@ -6,12 +6,13 @@ public class Main
     {
         ProductRepo productRepo = new ProductRepo();
         OrderRepo orderRepo = new OrderMapRepo();
+        IdService idService = new UuidIdService();
 
         productRepo.addProduct(new Product("1", "Apfel"));
         productRepo.addProduct(new Product("2", "Banana"));
         productRepo.addProduct(new Product("3", "Cherry"));
 
-        ShopService shopService = new ShopService(productRepo, orderRepo);
+        ShopService shopService = new ShopService(productRepo, orderRepo, idService);
 
         List<String> order1Products = List.of("1");
         Order order1 = shopService.addOrder(order1Products);
