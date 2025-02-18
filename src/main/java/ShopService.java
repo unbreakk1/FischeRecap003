@@ -1,9 +1,6 @@
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ShopService
@@ -11,11 +8,11 @@ public class ShopService
     private final ProductRepo productRepo;
     private final OrderRepo orderRepo;
     private final IdService idService;
+
     public Order addOrder(List<String> productIds)
     {
         List<Product> products = new ArrayList<>();
-        for (String productId : productIds)
-        {
+        for (String productId : productIds) {
             Optional<Product> productToOrder = productRepo.getProductById(productId);
 
             products.add(productToOrder.orElseThrow(() ->
@@ -48,5 +45,19 @@ public class ShopService
                 .collect(Collectors.toList());
     }
 
-}
+    public Map<OrderStatus, Order> getOldestOrderPerStatus()
+    {
+        return orderRepo.getOrders().stream()
+                .collect(Collectors.groupingBy(
+                        Order::status,
+                        Collectors.minBy(Comparator.comparing(Order::timestamp))
+                ))
+                .entrySet().stream()
+                .filter(entry -> entry.getValue().isPresent()) // Filter entries with present values
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().get() // Get the actual order from Optional
+                ));
 
+    }
+}
