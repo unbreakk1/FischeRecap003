@@ -15,16 +15,8 @@ public class Main
         IdService idService = new UuidIdService();
         ShopService shopService = new ShopService(productRepo, orderRepo, idService);
 
-        // Map to store alias-to-OrderID mappings
         Map<String, String> aliasToOrderId = new HashMap<>();
 
-        // Populate some products for testing
-        productRepo.addProduct(new Product("1", "Apple"));
-        productRepo.addProduct(new Product("2", "Banana"));
-        productRepo.addProduct(new Product("3", "Cherry"));
-        productRepo.addProduct(new Product("4", "Date"));
-
-        // Read and process the commands from the "transactions.txt" file
         try
         {
             List<String> lines = Files.readAllLines(Paths.get("transactions.txt"));
@@ -39,51 +31,59 @@ public class Main
         }
     }
 
-    private static void processCommand(String commandLine, ShopService shopService, Map<String, String> aliasToOrderId) {
-        // Split the command line into parts
-        String[] parts = commandLine.split(" ");
+    private static void processCommand(String commandLine, ShopService shopService, Map<String, String> aliasToOrderId)
+    {
+        String[] parts = commandLine.strip().split(" ");
         String command = parts[0];
 
-        switch (command)
-        {
+        switch (command) {
             case "addOrder" ->
             {
+
                 if (parts.length < 3)
                 {
-                    System.err.println("Invalid addOrder command: " + commandLine);
+                    System.err.println("Invalid 'addOrder' command! Proper usage: addOrder <alias> <productId> [<productId>...]");
                     break;
                 }
-                String alias = parts[1]; // Get the alias for the order
-                List<String> productIds = Arrays.asList(Arrays.copyOfRange(parts, 2, parts.length)); // Extract product IDs
+
+                String alias = parts[1];
+                List<String> productIds = Arrays.asList(Arrays.copyOfRange(parts, 2, parts.length));
+
                 try
                 {
-                    Order newOrder = shopService.addOrder(productIds); // Add the order
-                    aliasToOrderId.put(alias, newOrder.id()); // Save the alias-to-OrderID mapping
-                    System.out.println("Added Order: " + newOrder);
-                }
-                catch (IllegalArgumentException e)
+                    Order newOrder = shopService.addOrder(productIds);
+
+                    aliasToOrderId.put(alias, newOrder.id());
+                    System.out.println("Added Order with alias '" + alias + "': " + newOrder);
+                } catch (IllegalArgumentException e)
                 {
-                    System.err.println("Failed to add order: " + e.getMessage());
+                    System.err.println("Error while adding order: " + e.getMessage());
                 }
             }
+
             case "setStatus" ->
             {
                 if (parts.length != 3)
                 {
-                    System.err.println("Invalid setStatus command: " + commandLine);
+                    System.err.println("Invalid 'setStatus' command! Proper usage: setStatus <alias> <status>");
                     break;
                 }
+
                 String alias = parts[1];
                 String statusString = parts[2];
+
                 try
                 {
-                    OrderStatus status = OrderStatus.valueOf(statusString); // Parse the status
-                    String orderId = aliasToOrderId.get(alias); // Get the OrderID from the alias
-                    if (orderId == null) {
+                    OrderStatus status = OrderStatus.valueOf(statusString.toUpperCase());
+
+                    String orderId = aliasToOrderId.get(alias);
+                    if (orderId == null)
+                    {
                         System.err.println("No order found for alias: " + alias);
                         break;
                     }
-                    Order updatedOrder = shopService.updateOrder(orderId, status); // Update the order status
+
+                    Order updatedOrder = shopService.updateOrder(orderId, status);
                     System.out.println("Updated Order: " + updatedOrder);
                 }
                 catch (IllegalArgumentException e)
@@ -91,15 +91,23 @@ public class Main
                     System.err.println("Invalid status or alias: " + e.getMessage());
                 }
             }
+
             case "printOrders" ->
             {
                 System.out.println("All Orders:");
                 shopService.getOrdersByStatus(OrderStatus.PROCESSING).forEach(System.out::println);
                 shopService.getOrdersByStatus(OrderStatus.COMPLETED).forEach(System.out::println);
                 shopService.getOrdersByStatus(OrderStatus.IN_DELIVERY).forEach(System.out::println);
+
+                System.out.println("Available Products:");
+                shopService.getAvailableProducts().forEach(System.out::println);
             }
+
             default -> System.err.println("Unknown command: " + commandLine);
         }
+
+
+
     }
 
 

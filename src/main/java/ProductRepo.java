@@ -9,7 +9,11 @@ public class ProductRepo
     public ProductRepo()
     {
         products = new ArrayList<>();
-        products.add(new Product("1", "Apfel"));
+        // example stock
+        products.add(new Product("1", "Apple", 10.5));
+        products.add(new Product("2", "Banana", 25.0));
+        products.add(new Product("3", "Cherry", 15.0));
+        products.add(new Product("4", "Date", 8.0));
     }
 
     public List<Product> getProducts() {
@@ -25,6 +29,18 @@ public class ProductRepo
     {
         products.add(newProduct);
         return newProduct;
+    }
+
+    public void updateProduct(Product updatedProduct) {
+        for (int i = 0; i < products.size(); i++)
+        {
+            if (products.get(i).id().equals(updatedProduct.id()))
+            {
+                products.set(i, updatedProduct);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Product with ID " + updatedProduct.id() + " not found!");
     }
 
     public void removeProduct(String id)

@@ -12,12 +12,20 @@ public class ShopService
     public Order addOrder(List<String> productIds)
     {
         List<Product> products = new ArrayList<>();
-        for (String productId : productIds) {
+        for (String productId : productIds)
+        {
             Optional<Product> productToOrder = productRepo.getProductById(productId);
 
-            products.add(productToOrder.orElseThrow(() ->
-                    new IllegalArgumentException("Product with ID " + productId + " does not exist!")));
+            Product product = productToOrder.orElseThrow(() ->
+                    new IllegalArgumentException("Product with ID " + productId + " does not exist!"));
+
+            if (!product.isInStock(1.0))
+                throw new IllegalArgumentException("Product " + product.name() + " is out of stock!");
+
+            product.updateQuantity(1.0);
+            products.add(product);
         }
+
         Order newOrder = new Order(UUID.randomUUID().toString(), products);
 
         return orderRepo.addOrder(newOrder);
@@ -29,13 +37,17 @@ public class ShopService
         if (existingOrder == null)
             throw new IllegalArgumentException("Order with ID " + orderId + " not found!");
 
-
         Order updatedOrder = existingOrder.withStatus(newStatus);
 
         orderRepo.removeOrder(orderId);
         orderRepo.addOrder(updatedOrder);
 
         return updatedOrder;
+    }
+
+    public List<Product> getAvailableProducts()
+    {
+        return productRepo.getProducts();
     }
 
     public List<Order> getOrdersByStatus(OrderStatus status)
@@ -53,10 +65,10 @@ public class ShopService
                         Collectors.minBy(Comparator.comparing(Order::timestamp))
                 ))
                 .entrySet().stream()
-                .filter(entry -> entry.getValue().isPresent()) // Filter entries with present values
+                .filter(entry -> entry.getValue().isPresent())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue().get() // Get the actual order from Optional
+                        entry -> entry.getValue().get()
                 ));
 
     }

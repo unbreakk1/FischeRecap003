@@ -1,0 +1,5 @@
+﻿addOrder A 1 2 3
+setStatus A COMPLETED
+addOrder B 4
+setStatus B IN_DELIVERY
+printOrders
